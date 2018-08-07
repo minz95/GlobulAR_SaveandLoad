@@ -1,13 +1,34 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Custom/InvisibleMask" {
+Shader "Custom/Occluder"
+{
 	SubShader
 	{
-		// draw after all opaque objects (queue = 2001):
-		Tags{ "RenderType" = "Opaque" "Queue" = "Geometry+1" }
-		Pass
+		Tags
 		{
-			Blend Zero One // keep the image behind it
+			"Queue" = "Background+1"
 		}
+
+
+		BlendOp Min
+		Blend One One
+
+
+		CGPROGRAM
+		#pragma surface surf Lambert
+
+
+		struct Input
+		{
+			float Nothing;
+		};
+
+
+		void surf(Input IN, inout SurfaceOutput o)
+		{
+			o.Albedo = half4(1, 1, 1, 1);
+		}
+		ENDCG
 	}
+
+
+	Fallback "VertexLit"
 }

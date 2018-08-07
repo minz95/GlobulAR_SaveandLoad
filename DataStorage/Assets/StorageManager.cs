@@ -52,7 +52,7 @@ public class StorageManager : MonoBehaviour {
                         GameObject obj;
                         if (is_sphere == 1) obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                         else obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        
+
                         obj.name = values[0];
 
                         Vector3 pos = new Vector3(float.Parse(values[1]), 
@@ -79,9 +79,35 @@ public class StorageManager : MonoBehaviour {
 
                         // set the tag "photo_object" to the loaded photo object
                         obj.tag = "photo_object";
-                        obj.AddComponent<DataStorage>();
-                        //obj.AddComponent<Rigidbody>();
-                        //obj.GetComponent<Rigidbody>().useGravity = false;
+                        DataStorage ds = obj.AddComponent<DataStorage>();
+                        ds.Init();
+
+                        if (temp.tag == "Container")
+                        {
+                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
+                            rigid.useGravity = true;
+                            rigid.velocity = Vector3.zero;
+                            obj.GetComponent<Collider>().isTrigger = false;
+                            ds.EnableGravity();
+                            ds.IsColliding(true);
+                        }
+                        else if (temp.transform.parent != null && temp.transform.parent.tag == "Container")
+                        {
+                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
+                            rigid.useGravity = true;
+                            rigid.velocity = Vector3.zero;
+                            obj.GetComponent<Collider>().isTrigger = false;
+                            ds.EnableGravity();
+                            ds.IsColliding(true);
+                        }
+                        else
+                        {
+
+                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
+                            rigid.useGravity = false;
+                            //rigid.isKinematic = true;
+                            obj.GetComponent<Collider>().isTrigger = true;
+                        }
                     }
                 }
             }

@@ -29,6 +29,21 @@ public class DataStorage : MonoBehaviour {
     LayerMask layer_mask;
     RaycastHit hit_info;
 
+    public void EnableGravity()
+    {
+        gravity_mode = true;
+    }
+
+    public void DisableGravity()
+    {
+        gravity_mode = false;
+    }
+
+    public void IsColliding(bool b)
+    {
+        is_colliding = b;
+    }
+
     // mouse event will be replaced with hololens gesture interactions
     void OnMouseEnter()
     {
@@ -53,12 +68,6 @@ public class DataStorage : MonoBehaviour {
             {
                 boundbox.EnableBox();
             }
-        }
-
-        //DEBUG
-        if(colid.isTrigger)
-        {
-            Debug.Log("isTrigger ON now");
         }
     }
 
@@ -96,7 +105,7 @@ public class DataStorage : MonoBehaviour {
             boundbox.UnableBox();
         }
         colid.attachedRigidbody.velocity = Vector3.zero;
-        Debug.Log(colid.attachedRigidbody.velocity);
+        //Debug.Log(colid.attachedRigidbody.velocity);
         Debug.Log("mouse up!");
     }
 
@@ -119,9 +128,28 @@ public class DataStorage : MonoBehaviour {
         boundbox = FindObjectOfType<DimBoxes.BoundBox>();
         layer_mask = ~1 << 2;   // ignore the layer 2 ("Ignore Raycast" layer - gravity field)
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    public void Init()
+    {
+        persist_path = Application.persistentDataPath;
+        directory_path = persist_path + "/mapping_data";
+        obj = this.gameObject;
+        rend = this.gameObject.GetComponent<Renderer>();
+        colid = this.gameObject.GetComponent<Collider>();
+        if (!Directory.Exists(directory_path))
+        {
+            //if it doesn't, create it
+            Directory.CreateDirectory(directory_path);
+        }
+
+        // occluded by the invisible walls
+        rend.material.renderQueue = 2002;
+        boundbox = FindObjectOfType<DimBoxes.BoundBox>();
+        layer_mask = ~1 << 2;   // ignore the layer 2 ("Ignore Raycast" layer - gravity field)
+    }
+
+    // Update is called once per frame
+    void Update () {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         if (dragging)
