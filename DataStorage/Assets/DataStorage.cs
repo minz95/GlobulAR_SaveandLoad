@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 public class DataStorage : MonoBehaviour {
     string persist_path;
@@ -16,6 +17,7 @@ public class DataStorage : MonoBehaviour {
     //string path;
     GameObject obj;
     GameObject save_obj = null;
+    GameObject mapped_obj = null;
     Renderer rend;
     Collider colid;
     private Color mouseOverColor = Color.blue;
@@ -89,7 +91,13 @@ public class DataStorage : MonoBehaviour {
         {
             Debug.Log("store data!");
             StoreData(save_obj);
-            
+
+            // Delete object data from the previously mapped object
+            if (mapped_obj != null)
+            {
+                DeleteData(mapped_obj);
+            }
+            mapped_obj = save_obj;
         }
         else if(gravity_mode && (save_obj != null))
         {
@@ -217,6 +225,31 @@ public class DataStorage : MonoBehaviour {
         }
     }
 
+    void DeleteData(GameObject gameObject)
+    {
+        string path = directory_path + "/" + gameObject.name + ".csv";
+        string n_path = directory_path + "/n_" + gameObject.name + ".csv";
+
+        // Find the content from the csv file
+        string line = null;
+        //string line_to_delete = "the line i want to delete";
+        using (StreamReader reader = new StreamReader(path))
+        {
+            using (StreamWriter writer = new StreamWriter(n_path))
+            {
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (String.Compare(line.Split(',')[0], gameObject.name) == 0)
+                        continue;
+
+                    writer.WriteLine(line);
+                }
+            }
+        }
+        File.Delete(path);
+        File.Move(n_path, path);
+    }
+
     void ClearData(string path)
     {
         File.WriteAllText(path, "");
@@ -295,6 +328,13 @@ public class DataStorage : MonoBehaviour {
         {
             StoreData(save_obj);
             save_mode = false;
+
+            // Delete object data from the previously mapped object
+            if (mapped_obj != null)
+            {
+                DeleteData(mapped_obj);
+            }
+            mapped_obj = save_obj;
         }
     }
 }

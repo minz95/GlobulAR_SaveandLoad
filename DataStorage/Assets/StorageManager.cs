@@ -90,6 +90,7 @@ public class StorageManager : MonoBehaviour {
                             obj.GetComponent<Collider>().isTrigger = false;
                             ds.EnableGravity();
                             ds.IsColliding(true);
+                            rigid.drag = 100000;
                         }
                         else if (temp.transform.parent != null && temp.transform.parent.tag == "Container")
                         {
@@ -99,14 +100,15 @@ public class StorageManager : MonoBehaviour {
                             obj.GetComponent<Collider>().isTrigger = false;
                             ds.EnableGravity();
                             ds.IsColliding(true);
+                            rigid.drag = 100000;
                         }
                         else
                         {
-
                             Rigidbody rigid = obj.AddComponent<Rigidbody>();
                             rigid.useGravity = false;
                             //rigid.isKinematic = true;
                             obj.GetComponent<Collider>().isTrigger = true;
+                            rigid.drag = 100000;
                         }
                     }
                 }
