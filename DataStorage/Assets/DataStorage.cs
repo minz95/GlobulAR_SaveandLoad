@@ -25,6 +25,7 @@ public class DataStorage : MonoBehaviour {
     private Color TriggerColor = Color.red;
     private bool dragging = false;
     private float distance;
+    private Vector3 mapping_vec;    // store the subjective vector between mapped and mapping object
     DimBoxes.BoundBox boundbox;
 
     // dealing with raycast-object selection
@@ -46,6 +47,18 @@ public class DataStorage : MonoBehaviour {
         is_colliding = b;
     }
 
+    public void SetObjects(GameObject gameObject)
+    {
+        //save_obj = gameObject;
+        mapped_obj = gameObject;
+        //Debug.Log("initialized the objects~");
+    }
+
+    public void SetMappingDist(Vector3 dist)
+    {
+        mapping_vec = dist;
+    }
+
     // mouse event will be replaced with hololens gesture interactions
     void OnMouseEnter()
     {
@@ -65,18 +78,21 @@ public class DataStorage : MonoBehaviour {
 
         if(is_colliding)
         {
+            if (save_obj == null) save_obj = mapped_obj;
             boundbox = save_obj.gameObject.GetComponentInParent<DimBoxes.BoundBox>();
             if (boundbox != null)
             {
                 boundbox.EnableBox();
             }
         }
+        
     }
 
     private void OnMouseDrag()
     {
         if (is_colliding)
         {
+            if (save_obj == null) save_obj = mapped_obj;
             boundbox = save_obj.gameObject.GetComponentInParent<DimBoxes.BoundBox>();
             if (boundbox != null)
             {
@@ -87,7 +103,7 @@ public class DataStorage : MonoBehaviour {
 
     void OnMouseUp()
     {
-        if (save_mode && (save_obj != null))
+        if (!gravity_mode && save_mode && (save_obj != null))
         {
             Debug.Log("store data!");
             StoreData(save_obj);
@@ -183,6 +199,17 @@ public class DataStorage : MonoBehaviour {
             }
         }
 
+        // follow the mapped obj (calculate the coordinates here)
+        if(mapped_obj != null && !dragging)
+        {
+            Vector3 n_vec = obj.transform.position - mapped_obj.transform.position;
+            if (n_vec != mapping_vec)
+            {
+                Debug.Log("come in mapping distance management");
+                // move the object toward the mapping object
+                obj.transform.position = mapped_obj.transform.position + mapping_vec;
+            }
+        }
     }
     
     /**
@@ -200,6 +227,7 @@ public class DataStorage : MonoBehaviour {
         Vector3 pos = obj.transform.position;
         //Vector3 local_pos = obj.transform.InverseTransformVector(pos - gameObject.transform.position);
         Vector3 local_pos = pos - gameObject.transform.position;
+        mapping_vec = local_pos;
         content += local_pos.x + ",";
         content += local_pos.y + ",";
         content += local_pos.z + ",";
@@ -239,9 +267,9 @@ public class DataStorage : MonoBehaviour {
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (String.Compare(line.Split(',')[0], gameObject.name) == 0)
+                    if (String.Compare(line.Split(',')[0], obj.name) == 0)
                         continue;
-
+                     
                     writer.WriteLine(line);
                 }
             }
@@ -301,12 +329,15 @@ public class DataStorage : MonoBehaviour {
                         boundbox.UnableBox();
                     }
                 }
+                DeleteData(mapped_obj);
+                mapped_obj = null;
             }
         }
-        if(other.gameObject.name == "gravity_field" && save_mode == false && gravity_mode == true)
+        if(other.gameObject.name == "gravity_field" && gravity_mode == true)
         {
             Debug.Log("gravity mode exit");
             gravity_mode = false;
+            save_mode = false;
             colid.isTrigger = true;
             colid.attachedRigidbody.useGravity = false;
             is_colliding = false;
@@ -318,14 +349,16 @@ public class DataStorage : MonoBehaviour {
                     boundbox.UnableBox();
                 }
             }
+            DeleteData(mapped_obj);
+            mapped_obj = null;
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("collision enter, save!");
-        if(save_mode && collision.collider.gameObject.tag != "photo_object")
+        if (save_mode && collision.collider.gameObject.tag != "photo_object")
         {
+            Debug.Log("collision enter, save!");
             StoreData(save_obj);
             save_mode = false;
 

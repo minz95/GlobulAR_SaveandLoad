@@ -48,6 +48,15 @@ public class StorageManager : MonoBehaviour {
                         values = line.Split(',');
                         if (values.Length != 12) continue;
 
+                        string file_name = Path.GetFileName(file);
+                        file_name = file_name.Split('.')[0];
+                        //GameObject temp = gameobjs.Find(x => x.name == file_name);
+                        GameObject temp = GameObject.Find(file_name);
+                        if (temp == null)
+                        {
+                            continue;
+                        }
+
                         int is_sphere = int.Parse(values[11]);
                         GameObject obj;
                         if (is_sphere == 1) obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -57,15 +66,7 @@ public class StorageManager : MonoBehaviour {
 
                         Vector3 pos = new Vector3(float.Parse(values[1]), 
                             float.Parse(values[2]), float.Parse(values[3]));
-                        // find the mapped object in order to calculate the world position
-                        string file_name = Path.GetFileName(file);
-                        file_name = file_name.Split('.')[0];
-                        //GameObject temp = gameobjs.Find(x => x.name == file_name);
-                        GameObject temp = GameObject.Find(file_name);
-                        if (temp == null)
-                        {
-                            continue;
-                        }
+                        // find the mapped object in order to calculate the world position 
 
                         Vector3 world_pos = pos + temp.transform.position;
                         // calculate world position through marker object's position
@@ -79,36 +80,32 @@ public class StorageManager : MonoBehaviour {
 
                         // set the tag "photo_object" to the loaded photo object
                         obj.tag = "photo_object";
+                        Rigidbody rigid = obj.AddComponent<Rigidbody>();
+                        rigid.velocity = Vector3.zero;
+                        rigid.drag = 100000;
                         DataStorage ds = obj.AddComponent<DataStorage>();
+                        ds.SetObjects(temp);
                         ds.Init();
+                        ds.SetMappingDist(pos);
 
                         if (temp.tag == "Container")
                         {
-                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
                             rigid.useGravity = true;
-                            rigid.velocity = Vector3.zero;
                             obj.GetComponent<Collider>().isTrigger = false;
                             ds.EnableGravity();
                             ds.IsColliding(true);
-                            rigid.drag = 100000;
                         }
                         else if (temp.transform.parent != null && temp.transform.parent.tag == "Container")
                         {
-                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
                             rigid.useGravity = true;
-                            rigid.velocity = Vector3.zero;
                             obj.GetComponent<Collider>().isTrigger = false;
                             ds.EnableGravity();
                             ds.IsColliding(true);
-                            rigid.drag = 100000;
                         }
                         else
                         {
-                            Rigidbody rigid = obj.AddComponent<Rigidbody>();
                             rigid.useGravity = false;
-                            //rigid.isKinematic = true;
                             obj.GetComponent<Collider>().isTrigger = true;
-                            rigid.drag = 100000;
                         }
                     }
                 }
