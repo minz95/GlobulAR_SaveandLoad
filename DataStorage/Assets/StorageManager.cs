@@ -82,7 +82,7 @@ public class StorageManager : MonoBehaviour {
                         obj.tag = "photo_object";
                         Rigidbody rigid = obj.AddComponent<Rigidbody>();
                         rigid.velocity = Vector3.zero;
-                        rigid.drag = 100000;
+                        rigid.drag = 5;
                         DataStorage ds = obj.AddComponent<DataStorage>();
                         ds.SetObjects(temp);
                         ds.Init();

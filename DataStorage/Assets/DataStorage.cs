@@ -25,6 +25,7 @@ public class DataStorage : MonoBehaviour {
     private Color TriggerColor = Color.red;
     private bool dragging = false;
     private float distance;
+    private Vector3 mapped_pos;
     private Vector3 mapping_vec;    // store the subjective vector between mapped and mapping object
     DimBoxes.BoundBox boundbox;
 
@@ -57,6 +58,11 @@ public class DataStorage : MonoBehaviour {
     public void SetMappingDist(Vector3 dist)
     {
         mapping_vec = dist;
+    }
+
+    public void SetMappingPos(Vector3 pos)
+    {
+        mapped_pos = pos;
     }
 
     // mouse event will be replaced with hololens gesture interactions
@@ -202,12 +208,21 @@ public class DataStorage : MonoBehaviour {
         // follow the mapped obj (calculate the coordinates here)
         if(mapped_obj != null && !dragging)
         {
-            Vector3 n_vec = obj.transform.position - mapped_obj.transform.position;
-            if (n_vec != mapping_vec)
+            Vector3 n_pos = mapped_obj.transform.position;
+            if(n_pos != mapped_pos)
             {
-                Debug.Log("come in mapping distance management");
-                // move the object toward the mapping object
                 obj.transform.position = mapped_obj.transform.position + mapping_vec;
+            }
+            else
+            {
+                Vector3 n_vec = obj.transform.position - mapped_obj.transform.position;
+                if (n_vec != mapping_vec)
+                {
+                    Debug.Log("come in mapping distance management");
+                    // move the object toward the mapping object
+                    mapping_vec = n_vec;
+                    //obj.transform.position = mapped_obj.transform.position + mapping_vec;
+                }
             }
         }
     }
@@ -329,7 +344,8 @@ public class DataStorage : MonoBehaviour {
                         boundbox.UnableBox();
                     }
                 }
-                DeleteData(mapped_obj);
+                if(mapped_obj != null)
+                    DeleteData(mapped_obj);
                 mapped_obj = null;
             }
         }
@@ -349,7 +365,8 @@ public class DataStorage : MonoBehaviour {
                     boundbox.UnableBox();
                 }
             }
-            DeleteData(mapped_obj);
+            if(mapped_obj != null)
+                DeleteData(mapped_obj);
             mapped_obj = null;
         }
     }

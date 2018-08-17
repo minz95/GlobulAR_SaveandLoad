@@ -43,8 +43,19 @@ public class MarkerManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
         rend = gameObject.GetComponentsInChildren<Renderer>();
-
-	}
+        //var currentAlpha = rend[0].material.color.a;
+        /*
+        for(int i = 0; i < rend.Length; i++)
+        {
+            Color color = rend[i].material.color;
+            color.a = 0.0f;
+            rend[i].material.color = color;
+            rend[i].material.shader = Shader.Find("Transparent/Diffuse");
+            rend[i].material.renderQueue = 2001;
+        }
+        */
+        //Debug.Log("color alpha: " + rend[0].material.color.a);
+    }
 	
 	// Update is called once per frame
 	void Update () {
