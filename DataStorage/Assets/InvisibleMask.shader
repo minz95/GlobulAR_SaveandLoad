@@ -1,8 +1,5 @@
 Shader "Custom/Occluder"
 {
-	Properties{
-		_Fade("Fade", Range(0, 1)) = 0.1
-	}
 	SubShader
 	{
 		Tags
@@ -11,8 +8,8 @@ Shader "Custom/Occluder"
 		}
 
 
-		//BlendOp Min
-		//Blend Zero One
+		BlendOp Min
+		Blend Zero One
 
 
 		CGPROGRAM
